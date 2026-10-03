@@ -1,5 +1,8 @@
 ---
 pcx_content_type: how-to
+description: Google Workspace in Zero Trust integrations.
+products:
+  - cloudflare-one
 title: Google Workspace
 tags:
   - Google
@@ -9,7 +12,7 @@ import { GlossaryTooltip, Render } from "~/components";
 
 :::note
 
-The Google Workspace IdP integration [is not supported](/cloudflare-one/faq/troubleshooting/#after-putting-google-workspace-behind-access-i-cant-log-in-it-keeps-redirecting-between-access-and-google-without-ever-completing-authentication) if your Google Workspace account is protected by Access.
+The Google Workspace IdP integration [is not supported](/cloudflare-one/access-controls/troubleshooting/#google-workspace-redirect-loop) if your Google Workspace account is protected by Access.
 :::
 
 You can integrate a Google Workspace (formerly G Suite) account with Cloudflare Access. Unlike the instructions for [generic Google authentication](/cloudflare-one/integrations/identity-providers/google/), the steps below will allow you to pull group membership information from your Google Workspace account.
@@ -78,7 +81,7 @@ You do not need to be a Google Cloud Platform user to integrate Google Workspace
 
 ### 2. Add Google Workspace to Cloudflare One
 
-1. In [Cloudflare One](https://one.dash.cloudflare.com/), go to **Integrations** > **Identity providers**.
+1. In the [Cloudflare dashboard](https://dash.cloudflare.com/), go to **Zero Trust** > **Integrations** > **Identity providers**.
 
 2. Select **Add new identity provider** and select **Google Workspace**.
 
@@ -95,22 +98,12 @@ You do not need to be a Google Cloud Platform user to integrate Google Workspace
 To test that your connection is working, go to **Integrations** > **Identity providers** and select **Test** next to Google Workspace. Your user identity and group membership should return.
 
 :::caution[SCIM Provisioning (Beta)]
-The direct SCIM provisioning integration with Google Workspace is not currently supported. Cloudflare is working with Google to complete the final approval process required to enable this feature. In the meantime, the SCIM endpoint will accept inbound SCIM events from any SCIM compliant service.
-
-To generate the SCIM endpoint, you must:
-
-1. Save your Google Workspace login method in Cloudflare One (step 6 above) and select **Back to Authentication** or return to **Integrations** > **Identity providers** in Cloudflare One.
-2. Find the Google Workspace login method you created > select **Edit**.
-3. Enable the **Enable SCIM** toggle.
-4. Select **Regenerate Secret**.
-
-This will generate a **SCIM Endpoint** that can accept inbound SCIM events from any SCIM compliant service.
-
+The SCIM provisioning integration with Google Workspace is not currently supported.
 :::
 
 :::note[`Failed to fetch group information from the identity provider` error]
 
-To test successfully, you must [finish setup](https://community.cloudflare.com/t/google-workspace-failed-to-fetch-group-information-from-the-identity-provider/313361/2). Testing before finishing setup will result in a [`Failed to fetch user/group information from the identity provider` error](/cloudflare-one/faq/troubleshooting/#i-am-getting-the-error-failed-to-fetch-usergroup-information-from-the-identity).
+To test successfully, you must [finish setup](https://community.cloudflare.com/t/google-workspace-failed-to-fetch-group-information-from-the-identity-provider/313361/2). Testing before finishing setup will result in a [`Failed to fetch user/group information from the identity provider` error](/cloudflare-one/access-controls/troubleshooting/#identity-provider-usergroup-info-error).
 
 :::
 
@@ -133,3 +126,26 @@ To test successfully, you must [finish setup](https://community.cloudflare.com/t
 ### `Error 401: deleted_client`
 
 <Render file="access/error-401" product="cloudflare-one" />
+
+### Redirect loop when protecting Google apps with Access
+
+Using Google Workspace as your identity provider while also protecting a Google-hosted application with an Access policy creates a circular redirect loop: Access sends users to Google to authenticate, but Google itself requires Access authentication first.
+
+If you need to protect a Google-hosted application and use Google Workspace as your IdP for other applications, configure a second identity provider (for example, Okta or Microsoft Entra ID) specifically for the Access application protecting that Google-hosted app. Keep Google Workspace as the IdP for your other applications.
+
+### Group membership not reflected in Access policies
+
+Google Workspace group membership changes do not immediately propagate to Cloudflare Access. There are two delays to be aware of:
+
+Google Workspace can take up to 24 hours to reflect group changes via the Admin SDK API. In addition, Cloudflare caches identity information for the duration of a user's active session, so a user who was added to or removed from a group will not see the policy change until their session expires or they re-authenticate.
+
+To force an immediate update for a specific user, go to **Zero Trust** > **Team & Resources** > **Users**, select the user, choose **Action** > **Revoke**, and confirm. This invalidates the user's Access session token and forces re-authentication with refreshed group membership.
+
+### Use multiple Google Workspace domains in Access policies
+
+If your organization has a primary Google Workspace domain and one or more secondary domains (for example, `example.com` and `example.co.uk`), all users authenticate through the same Google Workspace organization. You do not need to add separate identity providers for each domain.
+
+When building Access policies, you can target users across all domains by using group membership selectors rather than email domain selectors. Alternatively, use the **Emails ending in** selector with each domain as a separate policy rule connected with **OR** logic.
+
+If you have multiple distinct Google Workspace organizations (not just multiple domains within one organization), you must add each organization as a separate Google Workspace identity provider in Cloudflare Zero Trust.
+

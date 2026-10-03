@@ -2,6 +2,9 @@
 pcx_content_type: troubleshooting
 title: 4xx Client Error
 source: null
+description: Troubleshoot 4xx client error HTTP status codes.
+products:
+  - support
 ---
 
 `4xx` codes are error responses that indicate an issue on the client's end, potentially due to a network problem.
@@ -14,7 +17,7 @@ source: null
 
 [Log Explorer](/log-explorer/) provides access to Cloudflare logs with all the context available within the Cloudflare platform. 
 You can monitor security and performance issues with custom dashboards or investigate and troubleshoot issues with log search.
-Log explorer [allows to build queries](/log-explorer/log-search/) filtering for specific [Ray ID](/fundamentals/reference/cloudflare-ray-id/), which can be useful to investigate HTTP Errors.
+Log explorer [allows you to build queries](/log-explorer/log-search/) filtering for a specific [Ray ID](/fundamentals/reference/cloudflare-ray-id/), which can be useful to investigate HTTP Errors.
 
 ## 400 Bad Request
 
@@ -27,7 +30,7 @@ For a complete description of this error refer to the [Error 401](/support/troub
 
 ## 402 Payment Required
 
-The `402 Payment Required` status code is reserved for future use and is not yet implemented according to the standards outlined in [RFC 7231](https://tools.ietf.org/html/rfc7231).
+The `402 Payment Required` status code is reserved for future use and is not yet implemented according to the standards outlined in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#section-15.5).
 
 ## 403 Forbidden
 
@@ -89,6 +92,10 @@ For a complete description of this error refer to the [Error 416](/support/troub
 ## 417 Expectation Failed
 
 For a complete description of this error refer to the [Error 417](/support/troubleshooting/http-status-codes/4xx-client-error/error-417/) page.
+
+## 421 Misdirected Request
+
+For a complete description of this error refer to the [Error 421](/support/troubleshooting/http-status-codes/4xx-client-error/error-421/) page.
 
 ## 429 Too Many Requests
 

@@ -1,9 +1,12 @@
 ---
 pcx_content_type: navigation
 title: Storage and Broadcast
+description: Create real-time key-value stores and broadcast messages to participants in RealtimeKit.
 sidebar:
   label: Collaborative Stores
   order: 7
+products:
+  - realtime
 ---
 
 import RTKSDKSelector from "~/components/realtimekit/RTKSDKSelector/RTKSDKSelector.astro";
@@ -11,7 +14,7 @@ import RTKCodeSnippet from "~/components/realtimekit/RTKCodeSnippet/RTKCodeSnipp
 
 The RealtimeKit Stores API allows you to create multiple key-value pair realtime stores. Users can subscribe to changes in a store and receive real-time updates. Data is stored until a [session](/realtime/realtimekit/concepts/meeting/#session) is active.
 
-<RTKSDKSelector disabledPlatforms={["mobile-flutter"]} />
+<RTKSDKSelector />
 
 ### Create a Store
 
@@ -61,25 +64,18 @@ let store = meeting.stores.create(name: "myStore")
 ```
 
 </RTKCodeSnippet>
-
-<RTKCodeSnippet id="mobile-flutter">
-
-This feature is not currently supported in the Flutter SDK
-
-</RTKCodeSnippet>
-
 :::note
 This method must be executed for every user.
 :::
 
 ### Update a Store
 
-You can add, update or delete entires in a store:
+You can add, update or delete entries in a store:
 
 | Param   | Type       | Description                                                 | Required |
 | ------- | ---------- | ----------------------------------------------------------- | -------- |
 | `key`   | string     | Unique identifier used to store/update a value in the store | Yes      |
-| `value` | StoreValue | Value that can be stored agains a key                       | Yes      |
+| `value` | StoreValue | Value that can be stored against a key                       | Yes      |
 
 <RTKCodeSnippet id={"web-react", "mobile-react-native"}>
 

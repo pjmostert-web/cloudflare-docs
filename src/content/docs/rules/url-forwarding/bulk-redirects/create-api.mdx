@@ -1,10 +1,14 @@
 ---
 pcx_content_type: how-to
+products:
+  - rules
 title: Create Bulk Redirects via API
 sidebar:
   order: 7
   label: Create via API
 description: Learn how to create Bulk Redirects using the Cloudflare API.
+tags:
+  - Redirects
 ---
 
 import { Render, Steps, APIRequest, Tabs, TabItem } from "~/components";
@@ -195,9 +199,8 @@ The following request of the [Create an account ruleset](/api/resources/rulesets
 ```
 
 <Render
-	file="terraform-use-ref-field"
+	file="terraform-use-ref-field-with-location"
 	product="rules"
-	params={{ addDocsLocation: true }}
 />
 
 If there is already a phase entry point ruleset for the `http_request_redirect` phase, use the [Update an account ruleset](/api/resources/rulesets/methods/update/) operation instead, like in the following example:

@@ -1,13 +1,20 @@
 ---
 title: Troubleshoot DLP
 pcx_content_type: troubleshooting
+description: Troubleshoot common DLP issues in Cloudflare One.
+products:
+  - cloudflare-one
 sidebar:
-  order: 5
+  order: 10
+tags:
+  - Debugging
 ---
 
-import { Render } from "~/components";
+import { Render, Steps } from "~/components";
 
 Use this guide to troubleshoot common issues with Data Loss Prevention (DLP).
+
+To check whether a profile detects specific content without sending traffic through Gateway, use [Test scan](/cloudflare-one/data-loss-prevention/test-scan/).
 
 ## DLP policy does not trigger or block content
 
@@ -23,6 +30,20 @@ Once you turn on TLS decryption, you can create a DLP policy to inspect the cont
 | ----------- | -------- | --------------------- | ----- | ------ |
 | Domain      | in       | `box.com`             | And   | Block  |
 | DLP Profile | in       | _Credit card numbers_ |       |        |
+
+## Passive Detection shows no results
+
+[Passive Detection](/cloudflare-one/data-loss-prevention/passive-detection/) shows detections from sampled Gateway traffic. If you expect results but the dashboard is empty:
+
+<Steps>
+1. Select a time range that includes the traffic you want to investigate.
+2. Check **Traffic direction**. Remove the filter to include all traffic directions, or select _Unknown_ to check bodies without a recorded direction.
+3. Confirm that the expected detection entry is enabled in at least one DLP profile in the account.
+4. Confirm that traffic meets the [Gateway inspection prerequisites](/cloudflare-one/data-loss-prevention/passive-detection/#prerequisites), including HTTP filtering and TLS decryption for HTTPS.
+5. Check whether a [Do Not Inspect policy](/cloudflare-one/traffic-policies/http-policies/#do-not-inspect) or another routing configuration excludes the traffic from inspection.
+</Steps>
+
+An individual request or response body may not be sampled. An empty dashboard does not confirm that sensitive data is absent.
 
 ## DLP scans trigger false positives or block legitimate sites
 
@@ -54,9 +75,15 @@ You can also create policies that match trusted applications using the [**Do Not
 
 If DLP detects sensitive data in plain text but not within images or certain applications, check for the following issues:
 
-- **OCR is turned on**: For DLP to scan text within images (such as a picture of a credit card), you must turn on [Optical Character Recognition (OCR)](/cloudflare-one/data-loss-prevention/dlp-profiles/advanced-settings/#optical-character-recognition-ocr) in the corresponding DLP profile.
-- **Application-specific behavior**: Some applications, such as WhatsApp Web, use protocols or encryption methods (such as WebSockets) that Gateway may not be able to fully inspect with HTTP policies.
+- **OCR is turned on**: For DLP to scan text within images (such as a picture of a credit card), you must turn on [Optical Character Recognition (OCR)](/cloudflare-one/data-loss-prevention/dlp-settings/#optical-character-recognition-ocr) in DLP settings.
+- **Application-specific behavior**: Some applications, such as WhatsApp Web, use protocols or encryption methods (such as WebSocket connections) that Gateway may not be able to fully inspect with HTTP policies.
 - **Supported file types**: Content must be in a [supported file type](/cloudflare-one/data-loss-prevention/#supported-file-types) for DLP inspection.
+
+## PII Record profile does not match
+
+The **Personally Identifiable Information (PII) Record** predefined profile does not match isolated values. Unlike most profiles, it matches only when at least three unique detection entries appear in close proximity, which reduces false positives from single, unrelated matches.
+
+If you need to detect an individual data type (such as a single email address or credit card number), use a different predefined profile or a [custom profile](/cloudflare-one/data-loss-prevention/dlp-profiles/#build-a-custom-profile) with the specific detection entries you want.
 
 ## DLP options are missing or you cannot create custom profiles
 

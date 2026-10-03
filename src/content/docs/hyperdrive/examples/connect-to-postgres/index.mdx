@@ -2,10 +2,14 @@
 hideChildren: false
 pcx_content_type: concept
 title: Connect to PostgreSQL
+description: Use Hyperdrive to connect to PostgreSQL and PostgreSQL-compatible databases from Cloudflare Workers.
 sidebar:
   order: 1
   group:
     hideIndex: false
+products:
+  - hyperdrive
+  - workers
 ---
 
 import { TabItem, Tabs, Render, WranglerConfig } from "~/components";
@@ -54,6 +58,8 @@ Hyperdrive uses Workers [TCP socket support](/workers/runtime-apis/tcp-sockets/#
 Other drivers and ORMs not listed may also be supported: this list is not exhaustive.
 
 <Render file="node-postgres-recommendation" product="hyperdrive" />
+
+<Render file="postgres-js-prepare-false" product="hyperdrive" />
 
 ### Database drivers and Node.js compatibility
 

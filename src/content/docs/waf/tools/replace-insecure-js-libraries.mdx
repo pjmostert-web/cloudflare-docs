@@ -1,9 +1,15 @@
 ---
 title: Replace insecure JS libraries
 pcx_content_type: reference
+description: Detect and notify about insecure JavaScript libraries on your site.
+products:
+  - waf
 head:
   - tag: title
     content: Replace insecure JavaScript libraries
+tags:
+  - JavaScript
+  - CSP
 ---
 
 import {
@@ -30,6 +36,10 @@ Additionally, if you are defining a CSP via HTML `meta` tag, you must either tur
 ## How it works
 
 When turned on, Cloudflare will check HTTP(S) proxied traffic for `script` tags with an `src` attribute pointing to a potentially insecure service and replace the `src` value with the equivalent link hosted under [cdnjs](https://cdnjs.cloudflare.com/).
+
+:::caution
+Replace insecure JavaScript libraries modifies eligible HTML responses. Cloudflare may decompress and recompress the response. When the transformation runs, Cloudflare removes headers such as `ETag` and `Content-Length`. For more information, refer to [Notes about end-to-end compression](/speed/optimization/content/compression/#notes-about-end-to-end-compression).
+:::
 
 The rewritten URL will keep the original URL scheme (`http://` or `https://`).
 

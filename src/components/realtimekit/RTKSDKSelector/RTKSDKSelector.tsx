@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
 	useFramework,
 	type Platform,
@@ -46,10 +46,6 @@ export default function SDKSelector({ disabledPlatforms }: SDKSelectorProps) {
 			id: "mobile-ios",
 		},
 		{
-			label: "Flutter",
-			id: "mobile-flutter",
-		},
-		{
 			label: "React Native",
 			id: "mobile-react-native",
 		},
@@ -65,7 +61,6 @@ export default function SDKSelector({ disabledPlatforms }: SDKSelectorProps) {
 		angular: "web-angular",
 		android: "mobile-android",
 		ios: "mobile-ios",
-		flutter: "mobile-flutter",
 		"react-native": "mobile-react-native",
 	};
 
@@ -81,6 +76,21 @@ export default function SDKSelector({ disabledPlatforms }: SDKSelectorProps) {
 		const subPlatform = frameworkToPlatform[fw.id];
 		return subPlatform ? isPlatformDisabled(subPlatform) : false;
 	};
+
+	// Auto-select the first enabled framework when the current one is disabled
+	useEffect(() => {
+		if (!framework) return;
+		if (!isFrameworkDisabled(framework)) return;
+
+		const availableFrameworks =
+			platform === "web" ? webFrameworks : mobileFrameworks;
+		const firstEnabled = availableFrameworks.find(
+			(fw) => !isFrameworkDisabled(fw),
+		);
+		if (firstEnabled) {
+			setSelection(platform, firstEnabled);
+		}
+	}, [platform, framework, disabledPlatforms]);
 
 	const isWebPlatformDisabled = () => {
 		if (isPlatformDisabled("web")) return true;
@@ -132,10 +142,13 @@ export default function SDKSelector({ disabledPlatforms }: SDKSelectorProps) {
 								onClick={() => {
 									if (disabled) return;
 									const nextPlatform = p.id;
+									const candidates =
+										nextPlatform === "web" ? webFrameworks : mobileFrameworks;
 									const nextFramework =
-										nextPlatform === "web"
-											? webFrameworks[0]
-											: mobileFrameworks[0];
+										candidates.find((fw) => {
+											const sub = frameworkToPlatform[fw.id];
+											return sub ? !disabledPlatforms?.includes(sub) : true;
+										}) ?? candidates[0];
 
 									setSelection(nextPlatform, nextFramework);
 								}}

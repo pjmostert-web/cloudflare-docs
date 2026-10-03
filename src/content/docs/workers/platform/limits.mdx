@@ -5,9 +5,16 @@ sidebar:
   order: 2
 head: []
 description: Cloudflare Workers plan and platform limits.
+products:
+  - workers
 ---
 
-import { Render, WranglerConfig, DashButton } from "~/components";
+import {
+	Render,
+	WranglerConfig,
+	DashButton,
+	TypeScriptExample,
+} from "~/components";
 
 ## Account plan limits
 
@@ -20,15 +27,14 @@ import { Render, WranglerConfig, DashButton } from "~/components";
 | [Simultaneous outgoing<br/>connections/request](#simultaneous-open-connections)  | 6            | 6              |
 | [Environment variables](#environment-variables)                                  | 64/Worker    | 128/Worker     |
 | [Environment variable<br/>size](#environment-variables)                          | 5 KB         | 5 KB           |
-| [Worker size](#worker-size)                                                      | 3 MB         | 10 MB          |
+| [Worker size](#worker-size)                                                      | 64 MiB       | 64 MiB         |
 | [Worker startup time](#worker-startup-time)                                      | 1 second     | 1 second       |
-| [Number of Workers](#number-of-workers)<sup>1</sup>                              | 100          | 500            |
+| [Number of Workers](#number-of-workers)                                         | 100          | 500[^1]        |
 | Number of [Cron Triggers](/workers/configuration/cron-triggers/)<br/>per account | 5            | 250            |
 | Number of [Static Asset](#static-assets) files per Worker version                | 20,000       | 100,000        |
 | Individual [Static Asset](#static-assets) file size                              | 25 MiB       | 25 MiB         |
 
-<sup>1</sup> If you reach this limit, consider using [Workers for
-Platforms](/cloudflare-for-platforms/workers-for-platforms/).
+[^1]: If you need a higher Worker limit, use [Workers for Platforms](/cloudflare-for-platforms/workers-for-platforms/).
 
 <Render file="limits_increase" product="workers" />
 
@@ -43,16 +49,16 @@ Platforms](/cloudflare-for-platforms/workers-for-platforms/).
 | Response header size | 128 KB (total)    |
 | Response body size   | No enforced limit |
 
-Request body size limits depend on your Cloudflare account plan, not your Workers plan. Requests exceeding these limits return a `413 Request entity too large` error.
+Request body size limits depend on your Cloudflare account plan, not your Workers plan. Requests exceeding these limits return a [`413 Request entity too large`](/support/troubleshooting/http-status-codes/4xx-client-error/error-413/#cloudflare-specific-information) error.
 
 | Cloudflare Plan | Maximum request body size |
 | --------------- | ------------------------- |
 | Free            | 100 MB                    |
 | Pro             | 100 MB                    |
 | Business        | 200 MB                    |
-| Enterprise      | 500 MB (by default)       |
+| Enterprise      | Up to 5 GB (self-serve)   |
 
-Enterprise customers can contact their account team or [Cloudflare Support](/support/contacting-cloudflare-support/) for a higher request body limit.
+Enterprise customers can adjust the maximum request body size up to 5 GB themselves from the zone's **Network** page (**Maximum Upload Size**). For limits above 5 GB, contact your account team or [Cloudflare Support](/support/contacting-cloudflare-support/).
 
 Cloudflare does not enforce response body size limits. [CDN cache limits](/cache/concepts/default-cache-behavior/) apply: 512 MB for Free, Pro, and Business plans, and 5 GB for Enterprise.
 
@@ -73,7 +79,7 @@ Most Workers consume very little CPU time. The average Worker uses approximately
 
 #### Error: exceeded CPU time limit {/* exceeded-cpu */}
 
-When a Worker exceeds its CPU time limit, Cloudflare returns **Error 1102** to the client with the message `Worker exceeded resource limits`. In the dashboard, this appears as `Exceeded CPU Time Limits` under **Metrics** > **Errors** > **Invocation Statuses**. In analytics and Logpush, the invocation outcome is `exceededCpu`.
+When a Worker exceeds its CPU time limit, Cloudflare returns [Error 1102](/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1102/#error-1102-worker-exceeded-resource-limits) to the client with the message `Worker exceeded resource limits`. In the dashboard, this appears as `Exceeded CPU Time Limits` under **Metrics** > **Errors** > **Invocation Statuses**. In analytics and Logpush, the invocation outcome is `exceededCpu`.
 
 To resolve a CPU time limit error:
 
@@ -121,7 +127,7 @@ When an isolate exceeds 128 MB, the Workers runtime lets in-flight requests comp
 
 #### Error: exceeded memory limit {/* exceeded-memory */}
 
-When a Worker exceeds its memory limit, Cloudflare returns **Error 1102** to the client with the message `Worker exceeded resource limits`. In the dashboard, this appears as `Exceeded Memory` under **Metrics** > **Errors** > **Invocation Statuses**. In analytics and Logpush, the invocation outcome is `exceededMemory`.
+When a Worker exceeds its memory limit, Cloudflare returns [Error 1102](/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1102/#error-1102-worker-exceeded-resource-limits) to the client with the message `Worker exceeded resource limits`. In the dashboard, this appears as `Exceeded Memory` under **Metrics** > **Errors** > **Invocation Statuses**. In analytics and Logpush, the invocation outcome is `exceededMemory`.
 
 You may also see the runtime error `Memory limit would be exceeded before EOF` when attempting to buffer a response body that exceeds the limit.
 
@@ -129,7 +135,8 @@ To resolve a memory limit error:
 
 1. **Stream request and response bodies** — Use [`TransformStream`](/workers/runtime-apis/streams/transformstream/) or [`node:stream`](/workers/runtime-apis/nodejs/streams/) instead of buffering entire payloads in memory.
 2. **Avoid large in-memory objects** — Store large data in [KV](/kv/), [R2](/r2/), or [D1](/d1/) instead of holding it in Worker memory.
-3. **Profile memory usage** — Use [memory profiling with DevTools](/workers/observability/dev-tools/memory-usage/) locally to identify leaks and high-memory allocations.
+3. **Update Zod** — If your Worker uses Zod, use [version 4.5.0 or later](https://github.com/colinhacks/zod/releases/tag/v4.5.0). Earlier versions use substantially more memory per schema.
+4. **Profile memory usage** — Use [memory profiling with DevTools](/workers/observability/dev-tools/memory-usage/) locally to identify leaks and high-memory allocations.
 
 To view memory errors in the dashboard:
 
@@ -144,7 +151,7 @@ To view memory errors in the dashboard:
 
 ## Duration
 
-Duration measures wall-clock time from start to end of a Worker invocation. There is no hard limit on duration for HTTP-triggered Workers. As long as the client remains connected, the Worker can continue processing, making subrequests, and setting timeouts.
+Duration measures wall-clock time from start to end of a Worker invocation.
 
 | Trigger type                                                      | Duration limit |
 | ----------------------------------------------------------------- | -------------- |
@@ -153,7 +160,7 @@ Duration measures wall-clock time from start to end of a Worker invocation. Ther
 | [Durable Object Alarm](/durable-objects/api/alarms/)              | 15 min         |
 | [Queue Consumer](/queues/configuration/javascript-apis/#consumer) | 15 min         |
 
-When the client disconnects, all tasks associated with that request are canceled. Use [`event.waitUntil()`](/workers/runtime-apis/handlers/fetch/) to delay cancellation for another 30 seconds or until the promise you pass to `waitUntil()` completes.
+There is no hard limit on duration for HTTP-triggered Workers. As long as the client remains connected, the Worker can continue processing, making subrequests, and streaming a response body. When the client disconnects or the response is complete, tasks associated with that request may be canceled. Use [`ctx.waitUntil()`](/workers/runtime-apis/context/#waituntil) to perform work after returning a response. `waitUntil()` can extend execution for up to 30 seconds after the response is sent or the client disconnects.
 
 :::note
 
@@ -181,14 +188,14 @@ You can configure the fail mode by toggling the corresponding [route](/workers/c
 
 A subrequest is any request a Worker makes using the [Fetch API](/workers/runtime-apis/fetch/) or to Cloudflare services like [R2](/r2/), [KV](/kv/), or [D1](/d1/).
 
-| Limit                            | Workers Free | Workers Paid           |
-| -------------------------------- | ------------ | ---------------------- |
-| Subrequests per invocation       | 50           | 10,000 (up to 10M)    |
+| Limit                            | Workers Free | Workers Paid                              |
+| -------------------------------- | ------------ | ----------------------------------------- |
+| Subrequests per invocation       | 50           | 10,000 (up to 10M)                        |
 | Subrequests to internal services | 1,000        | Matches configured limit (default 10,000) |
 
 Each subrequest in a redirect chain counts against this limit. The total number of subrequests may exceed the number of `fetch()` calls in your code. You can change the subrequest limit per Worker using the [`limits` configuration](/workers/wrangler/configuration/#limits) in your Wrangler configuration file.
 
-There is no set time limit on individual subrequests. As long as the client remains connected, the Worker can continue making subrequests. When the client disconnects, all tasks are canceled. Use [`event.waitUntil()`](/workers/runtime-apis/handlers/fetch/) to delay cancellation for up to 30 seconds.
+There is no set time limit on individual subrequests. As long as the client remains connected, the Worker can continue making subrequests. When the client disconnects or the response is complete, outstanding work may be canceled unless it is passed to [`ctx.waitUntil()`](/workers/runtime-apis/context/#waituntil), which can extend execution for up to 30 seconds.
 
 ### Worker-to-Worker subrequests
 
@@ -200,7 +207,7 @@ Using global [`fetch()`](/workers/runtime-apis/fetch/) to call another Worker on
 
 ## Simultaneous open connections
 
-Each Worker invocation can open up to six simultaneous connections. The following API calls count toward this limit:
+Each Worker invocation can have up to six connections simultaneously waiting for response headers. The following API calls count toward this limit while the initial connection is being established and the server has not yet responded:
 
 - `fetch()` method of the [Fetch API](/workers/runtime-apis/fetch/)
 - `get()`, `put()`, `list()`, and `delete()` methods of [Workers KV namespace objects](/kv/api/)
@@ -211,15 +218,17 @@ Each Worker invocation can open up to six simultaneous connections. The followin
 
 Outbound WebSocket connections also count toward this limit.
 
-Once six connections are open, the runtime queues additional attempts until an existing connection closes. The runtime may close stalled connections (those not actively reading or writing) with a `Response closed due to connection limit` exception.
+Once response headers arrive for a connection, it no longer counts toward the six-connection limit. This means a Worker can have many connections open simultaneously, as long as no more than six are in the initial "waiting for headers" phase at the same time. If a seventh connection is attempted while six are already waiting for headers, it is queued until one of the existing connections receives its response headers.
 
-If you use `fetch()` but do not need the response body, call `response.body.cancel()` to free the connection:
+If you use `fetch()` but do not need the response body, calling `response.body.cancel()` is still good practice to free memory:
+
+<TypeScriptExample filename="src/index.ts">
 
 ```ts
 const response = await fetch(url);
 
 // Only read the response body for successful responses
-if (response.statusCode <= 299) {
+if (response.status <= 299) {
 	// Call response.json(), response.text() or otherwise process the body
 } else {
 	// Explicitly cancel it
@@ -227,7 +236,7 @@ if (response.statusCode <= 299) {
 }
 ```
 
-If the system detects a deadlock (pending connection attempts with no in-progress reads or writes), it cancels the least-recently-used connection to unblock the Worker.
+</TypeScriptExample>
 
 :::note
 
@@ -251,19 +260,21 @@ The runtime measures simultaneous open connections from the top-level request. W
 
 | Limit                    | Workers Free | Workers Paid |
 | ------------------------ | ------------ | ------------ |
-| After compression (gzip) | 3 MB         | 10 MB        |
-| Before compression       | 64 MB        | 64 MB        |
+| Worker size (uncompressed) | 64 MiB     | 64 MiB       |
 
-Larger Worker bundles can impact startup time. To check your compressed bundle size:
+There is no compressed size limit. Only the uncompressed bundle size counts.
+
+Larger Worker bundles can impact startup time. To check your Worker bundle size:
 
 ```sh
 wrangler deploy --outdir bundled/ --dry-run
 ```
 
 ```sh output
-# Output will resemble the below:
 Total Upload: 259.61 KiB / gzip: 47.23 KiB
 ```
+
+The `Total Upload` value is your uncompressed bundle size. The `gzip` value is shown for reference but is not a limit.
 
 To reduce Worker size:
 
@@ -281,7 +292,7 @@ To reduce Worker size:
 
 A Worker must parse and execute its global scope (top-level code outside of handlers) within 1 second. Larger bundles and expensive initialization code in global scope increase startup time.
 
-When the platform rejects a deployment because the Worker exceeds the startup time limit, the validation returns the error `Script startup exceeded CPU time limit` (error code `10021`). Wrangler automatically generates a CPU profile that you can import into Chrome DevTools or open in VS Code. Refer to [`wrangler check startup`](/workers/wrangler/commands/#startup) for more details.
+When the platform rejects a deployment because the Worker exceeds the startup time limit, the validation returns the error `Script startup exceeded CPU time limit` (error code `10021`). Wrangler automatically generates a CPU profile that you can import into Chrome DevTools or open in VS Code. Refer to [`wrangler check startup`](/workers/wrangler/commands/workers/#startup) for more details.
 
 To measure startup time, run `npx wrangler@latest deploy` or `npx wrangler@latest versions upload`. Wrangler reports `startup_time_ms` in the output.
 
@@ -295,9 +306,7 @@ To reduce startup time, avoid expensive work in global scope. Move initializatio
 
 | Limit               | Workers Free | Workers Paid |
 | ------------------- | ------------ | ------------ |
-| Workers per account | 100          | 500          |
-
-If you need more than 500 Workers, consider using [Workers for Platforms](/cloudflare-for-platforms/workers-for-platforms/).
+| Workers per account | 100          | 500[^1]      |
 
 ---
 
@@ -312,7 +321,7 @@ If you need more than 500 Workers, consider using [Workers for Platforms](/cloud
 
 ### Routes with `wrangler dev --remote` {/* routes-remote-dev */}
 
-When you run a [remote development](/workers/development-testing/#remote-bindings) session using the `--remote` flag, Cloudflare enforces a limit of 50 routes per zone. The Quick Editor in the Cloudflare dashboard also uses `wrangler dev --remote`, so the same limit applies.
+When you run a [remote development](/workers/local-development/#remote-bindings) session using the `--remote` flag, Cloudflare enforces a limit of 50 routes per zone. The Quick Editor in the Cloudflare dashboard also uses `wrangler dev --remote`, so the same limit applies.
 
 If your zone has more than 50 routes, you cannot run a remote session until you remove routes to get under the limit.
 
@@ -351,7 +360,7 @@ Refer to the [Workers Trace Event Logpush documentation](/workers/observability/
 
 ## Image Resizing with Workers
 
-Refer to the [Image Resizing documentation](/images/transform-images/) for limits that apply when using Image Resizing with Workers.
+Refer to the [Image Resizing documentation](/images/optimization/transformations/overview/) for limits that apply when using Image Resizing with Workers.
 
 ---
 

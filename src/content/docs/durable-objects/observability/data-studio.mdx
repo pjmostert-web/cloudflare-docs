@@ -1,9 +1,12 @@
 ---
 title: Data Studio
+description: View and edit SQLite-backed Durable Object storage data through the Cloudflare dashboard UI.
 pcx_content_type: concept
 sidebar:
   order: 7
   badge: Beta
+products:
+  - durable-objects
 ---
 
 import { DashButton, Steps } from "~/components";
@@ -19,7 +22,7 @@ At the moment, you can only read/write data persisted using the [SQL API](/durab
 
 ## View Data Studio
 
-You need to have at least the `Workers Platform Admin` [role](/fundamentals/manage-members/roles/) to access Data Studio.
+You need at least `Editor` access to the Worker that implements the Durable Object to access Data Studio. Refer to [Durable Objects roles and permissions](/workers/authorization/durable-objects/) for more information.
 
 <Steps>
 1. In the Cloudflare dashboard, go to the **Durable Objects** page.

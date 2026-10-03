@@ -1,11 +1,15 @@
 ---
 pcx_content_type: reference
 title: Routing
+description: Learn how Pages Functions uses file-based routing to map URL patterns to function files.
 sidebar:
   order: 2
+products:
+  - pages
 ---
 
-import { Details, FileTree, PagesBuildPresetsTable, DashButton } from "~/components";
+import { Details, FileTree, DashButton } from "~/components";
+import PagesBuildPresetsTable from "~/components/cf/PagesBuildPresetsTable.astro";
 
 Functions utilize file-based routing. Your `/functions` directory structure determines the designated routes that your Functions will run on. You can create a `/functions` directory with as many levels as needed for your project's use case. Review the following directory:
 

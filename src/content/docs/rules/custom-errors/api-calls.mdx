@@ -1,6 +1,9 @@
 ---
 title: Common API calls for Custom Errors
 pcx_content_type: configuration
+description: Manage custom error rules and error pages using the Cloudflare API.
+products:
+  - rules
 sidebar:
   order: 5
   label: Common API calls
@@ -173,7 +176,7 @@ https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/custom_pages/assets/$A
 This example obtains the current configuration for the `Rate limiting block` error page (with ID `ratelimit_block`).
 
 <APIRequest
-	path="/zones/{zone_identifier}/custom_pages/{identifier}"
+	path="/zones/{zone_id}/custom_pages/{identifier}"
 	method="GET"
 	parameters={{
 		identifier: "ratelimit_block",
@@ -207,7 +210,7 @@ For a list of error page identifiers, refer to [Error page types](/rules/custom-
 This example defines a custom error page for `Rate limiting block` errors (with ID `ratelimit_block`) based on the provided URL.
 
 <APIRequest
-	path="/zones/{zone_identifier}/custom_pages/{identifier}"
+	path="/zones/{zone_id}/custom_pages/{identifier}"
 	method="PUT"
 	parameters={{
 		identifier: "ratelimit_block",

@@ -1,35 +1,50 @@
 ---
-title: WAF Release - Scheduled changes for 2026-03-09
-description: WAF managed ruleset changes scheduled for 2026-03-09
-date: 2026-03-02
-scheduled: true
+title: WAF Release - Scheduled changes for 2026-10-06
+description: WAF managed ruleset changes scheduled for 2026-10-06
+date: 2026-09-30
+publish_future_dated_entry: true
 ---
 
 import { RuleID } from "~/components";
 
 <table style="width: 100%">
-  <thead>
-    <tr>
-      <th>Announcement Date</th>
-      <th>Release Date</th>
-      <th>Release Behavior</th>
-      <th>Legacy Rule ID</th>
-      <th>Rule ID</th>
-      <th>Description</th>
-      <th>Comments</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2026-03-02</td>
-      <td>2026-03-09</td>
-      <td>Log</td>
-      <td>N/A</td>
-      <td>
-        <RuleID id="5ae86a9bda0c41dbb905132f796ea2f6" />
-      </td>
-      <td>Ivanti EPMM - Code Injection - CVE:CVE-2026-1281 CVE:CVE-2026-1340</td>
-      <td>This is a new detection. </td>
-   </tr>
-</tbody>
+	<thead>
+		<tr>
+			<th>Announcement Date</th>
+			<th>Release Date</th>
+			<th>Release Behavior</th>
+			<th>Legacy Rule ID</th>
+			<th>Rule ID</th>
+			<th>Description</th>
+			<th>Comments</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>2026-09-22</td>
+			<td>2026-10-06</td>
+			<td>Log</td>
+			<td>N/A</td>
+			<td>
+				<RuleID id="e6fd9291701d4fea96741ba1a056caff" />
+			</td>
+			<td>Command Injection - Generic 8 - uri - Beta</td>
+			<td>
+				This rule will be merged into the original rule "Command Injection - Generic 8 - uri" (ID:{" "}<RuleID id="ff8df24181aa4573a81be531ee159e2e" />).
+			</td>
+		</tr>
+		<tr>
+			<td>2026-09-30</td>
+			<td>2026-10-06</td>
+			<td>Log</td>
+			<td>N/A</td>
+			<td>
+				<RuleID id="f0c31de76290471e842c77ca7206c737" />
+			</td>
+			<td>F5 BIG-IP - UnAuth Heap-Overflow - CVE:CVE-2026-94127</td>
+			<td>
+				This is a new detection.
+			</td>
+		</tr>
+	</tbody>
 </table>

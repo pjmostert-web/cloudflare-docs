@@ -1,5 +1,8 @@
 ---
 pcx_content_type: how-to
+description: Microsoft Endpoint Manager in Zero Trust integrations.
+products:
+  - cloudflare-one
 title: Microsoft Endpoint Manager
 tags:
   - Microsoft
@@ -29,6 +32,12 @@ Device posture with Microsoft Endpoint Manager requires:
   		link: "/cloudflare-one/integrations/service-providers/",
   	}}
   />
+
+:::note
+Linux devices are not supported. Microsoft Intune does not collect hardware details, including serial numbers, for Linux devices. Cloudflare matches devices using serial numbers, so posture checks return empty results for Linux.
+
+Refer to Microsoft's [device details](https://learn.microsoft.com/en-us/intune/device-management/inventory-and-status/device-details) documentation.
+:::
 
 ## 1. Obtain Microsoft Graph settings
 

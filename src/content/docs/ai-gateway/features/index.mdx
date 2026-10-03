@@ -1,9 +1,12 @@
 ---
 title: Features
+description: Explore AI Gateway features including caching, rate limiting, guardrails, dynamic routing, and data loss prevention.
 pcx_content_type: overview
 order: 1
 sidebar:
   order: 4
+products:
+  - ai-gateway
 ---
 
 import { CardGrid, Feature, LinkTitleCard, Badge } from "~/components";
@@ -27,6 +30,19 @@ Serve identical requests directly from Cloudflare's global cache, reducing laten
 
 </Feature>
 
+<Feature header="Spend Limits" href="/ai-gateway/features/spend-limits/">
+
+Set cost-based budgets that track cumulative dollar spend across requests. Scope limits by model, provider, or custom metadata dimensions like user, team, or application.
+
+**Key benefits:**
+
+- Per-provider or per-model budgets
+- Per-user or per-team budgets using [custom metadata](/ai-gateway/observability/custom-metadata/)
+- Configurable time windows (daily, weekly, monthly)
+- Automatic request blocking when budget is exceeded
+
+</Feature>
+
 <Feature header="Rate Limiting" href="/ai-gateway/features/rate-limiting/">
 
 Control application scaling and protect against abuse with flexible rate limiting options. Set limits based on requests per time window with sliding or fixed window techniques.
@@ -37,6 +53,19 @@ Control application scaling and protect against abuse with flexible rate limitin
 - Control costs and usage patterns
 - Configurable per gateway or per request
 - Multiple rate limiting techniques available
+
+</Feature>
+
+<Feature header="Auto Router" href="/ai-gateway/features/auto-router/" badge="Beta">
+
+Automatically route each request to the most cost-effective model that can handle the task while maintaining response quality.
+
+**Key benefits:**
+
+- Content-aware model selection
+- Cost optimization across models
+- Automatic fallback when a model is unavailable
+- Session affinity to support caching
 
 </Feature>
 
@@ -171,13 +200,13 @@ Override default pricing with your negotiated rates or custom cost models. Apply
 
 ## Feature Comparison by Use Case
 
-| Use Case                   | Recommended Features                            |
-| -------------------------- | ----------------------------------------------- |
-| **Cost Optimization**      | Caching, Rate Limiting, Custom Costs            |
-| **High Availability**      | Fallbacks using Dynamic Routing                 |
-| **Security & Compliance**  | Guardrails, DLP, Authentication, BYOK, Logging  |
-| **Performance Monitoring** | Analytics, Logging, Custom Metadata             |
-| **A/B Testing**            | Dynamic Routing, Custom Metadata, Analytics     |
+| Use Case                   | Recommended Features                                            |
+| -------------------------- | --------------------------------------------------------------- |
+| **Cost Optimization**      | Caching, Auto Router, Spend Limits, Rate Limiting, Custom Costs |
+| **High Availability**      | Fallbacks using Dynamic Routing                                 |
+| **Security & Compliance**  | Guardrails, DLP, Authentication, BYOK, Logging                  |
+| **Performance Monitoring** | Analytics, Logging, Custom Metadata                             |
+| **A/B Testing**            | Dynamic Routing, Custom Metadata, Analytics                     |
 
 ## Getting Started with Features
 

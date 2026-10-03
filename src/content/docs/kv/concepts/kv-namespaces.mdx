@@ -1,9 +1,11 @@
 ---
 pcx_content_type: concept
 title: KV namespaces
+description: A KV namespace is a key-value database replicated across Cloudflare's global network.
 sidebar:
   order: 7
-
+products:
+  - kv
 ---
 import { Type, MetaInfo, WranglerConfig, DashButton } from "~/components";
 
@@ -16,6 +18,10 @@ Bind your KV namespaces through Wrangler or via the Cloudflare dashboard.
 KV namespace IDs are public and bound to your account.
 
 :::
+
+## Jurisdictions
+
+Namespaces can optionally be restricted to a jurisdiction to durably store data only within a specific region. Refer to [Data location](/kv/reference/data-location/) for more information.
 
 ## Bind your KV namespace through Wrangler
 

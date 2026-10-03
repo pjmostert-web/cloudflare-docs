@@ -1,6 +1,9 @@
 ---
 title: Diagnose traffic decisions
 pcx_content_type: troubleshooting
+description: Diagnose why the Network Firewall allowed or blocked traffic.
+products:
+  - cloudflare-network-firewall
 sidebar:
   order: 1
 ---
@@ -46,7 +49,7 @@ Before making changes, gather the following information:
 5. Filter the time range to when the issue occurred.
 6. Add additional filters if you know the affected traffic characteristics (such as Source IP, Destination IP, and more).
 7. To identify the blocking system:
-   In the **Packet Summary** graph, select the the three dots > **Mitigation system**.
+   In the **Packet Summary** graph, select the three dots > **Mitigation system**.
    This tells you which Cloudflare system blocked the traffic.
 
 ### If the mitigation system displays DDoS Managed Ruleset
@@ -79,7 +82,7 @@ If you cannot identify the issue from Network Analytics, use [packet captures](/
 
 1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com/).
 2. Under **Protect & Connect**, go to **Insights** > **Network health**.
-3. Go to **Diagnostics**, and configure a packet capture filter matching the affected traffic. Try to be as specific as possible to avoid generating too many packet capture files.
+3. Go to **Diagnostics**, and configure a packet capture filter matching the affected traffic. Note that the packet capture (pcap) might be empty because packets were dropped.
 4. Analyze the captured packets to understand traffic characteristics.
 5. Compare against your rule configurations.
 

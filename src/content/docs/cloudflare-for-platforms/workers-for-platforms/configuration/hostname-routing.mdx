@@ -4,18 +4,20 @@ title: Hostname routing
 description: Learn how to route requests to the dispatch worker.
 sidebar:
   order: 3
+products:
+  - cloudflare-for-platforms
 ---
 
 import { Render, PackageManagers, WranglerConfig } from "~/components";
 
-You can use [dynamic dispatch](/cloudflare-for-platforms/workers-for-platforms/configuration/dynamic-dispatch/) Workers to route millions of vanity domains or subdomains to Workers without hitting traditional [route limits](/workers/platform/limits/#number-of-routes-per-zone). These hostnames can be subdomains under your managed domain (e.g. `customer1.saas.com`) or vanity domains controlled by your end customers (e.g. `mystore.com`), which can be managed through [custom hostnames](/cloudflare-for-platforms/cloudflare-for-saas/domain-support/).
+You can use [dynamic dispatch](/cloudflare-for-platforms/workers-for-platforms/configuration/dynamic-dispatch/) Workers to route millions of vanity domains or subdomains to Workers without hitting traditional [route limits](/workers/platform/limits/#routes-and-domains). These hostnames can be subdomains under your managed domain (e.g. `customer1.saas.com`) or vanity domains controlled by your end customers (e.g. `mystore.com`), which can be managed through [custom hostnames](/cloudflare-for-platforms/cloudflare-for-saas/domain-support/).
 
 ## (Recommended) Wildcard route with a dispatch Worker
 
 Configure a wildcard [Route](/workers/configuration/routing/routes/) (`*/*`) on your SaaS domain (the domain where you configure custom hostnames) to point to your dynamic dispatch Worker. This allows you to:
 
 - **Support both subdomains and vanity domains**: Handle `customer1.myplatform.com` (subdomain) and `shop.customer.com` (custom hostname) with the same routing logic.
-- **Avoid route limits**: Instead of creating individual routes for every domain, which can cause you to hit [Routes limits](/workers/platform/limits/#number-of-routes-per-zone), you can handle the routing logic in code and proxy millions of domains to individual Workers.
+- **Avoid route limits**: Instead of creating individual routes for every domain, which can cause you to hit [Routes limits](/workers/platform/limits/#routes-and-domains), you can handle the routing logic in code and proxy millions of domains to individual Workers.
 - **Programmatically control routing logic**: Write custom code to route requests based on hostname, [custom metadata](/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/), path, or any other properties.
 
 :::note
@@ -72,7 +74,7 @@ If you're only looking to route subdomain records (e.g. `customer1.saas.com`), y
 
 To set up subdomain routing:
 
-1. Create an orange-clouded wildcard DNS record: `*.saas.com` that points to the origin. If the Worker is the origin then you can use a dummy DNS value (for example, `A 192.0.2.0`).
+1. Create an [orange-clouded](/dns/proxy-status/#benefits) wildcard DNS record: `*.saas.com` that points to the origin. If the Worker is the origin then you can use a dummy DNS value (for example, `A 192.0.2.0`).
 2. Set wildcard route: `*.saas.com/*` pointing to your dispatch Worker
 3. Add logic to the dispatch Worker to route subdomain requests to the right Worker.
 
@@ -95,13 +97,13 @@ export default {
 };
 ```
 
-### Orange-to-Orange (o2o) Behavior
+### O2O Behavior
 
-When your customers are also using Cloudflare and point their custom domain to your SaaS domain via CNAME (for example, `mystore.com` → `saas.com`), Worker routing behavior depends on whether the customer's DNS record is proxied (orange cloud) or DNS-only (grey cloud). Learn more about [Orange-to-Orange setups](/cloudflare-for-platforms/cloudflare-for-saas/saas-customers/how-it-works/#with-o2o)
+When your customers are also using Cloudflare and point their custom domain to your SaaS domain via CNAME (for example, `mystore.com` → `saas.com`), Worker routing behavior depends on whether the customer's DNS record is proxied (orange cloud) or DNS-only (grey cloud). Learn more about [O2O setups](/cloudflare-for-platforms/cloudflare-for-saas/saas-customers/how-it-works/#with-o2o)
 
 This can cause inconsistent behavior when using specific hostname routes:
 
-- If you're routing based on the CNAME target (`saas.com`), the custom hostname's DNS record must be orange-clouded for the Worker to be invoked.
+- If you're routing based on the CNAME target (`saas.com`), the custom hostname's DNS record must be [orange-clouded](/dns/proxy-status/#benefits) for the Worker to be invoked.
 - If you're routing based on the custom hostname (`mystore.com`), the customer's record must be grey-clouded for the Worker to be invoked.
 
 Since you may not have control over your customer's DNS proxy settings, we recommend using `*/*` wildcard route to ensure routing logic always works as expected, regardless of how DNS is configured.

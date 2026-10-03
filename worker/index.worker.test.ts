@@ -1,6 +1,5 @@
 import { SELF } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import { XMLParser } from "fast-xml-parser";
 import { parse } from "node-html-parser";
 
 describe("Cloudflare Docs", () => {
@@ -12,19 +11,90 @@ describe("Cloudflare Docs", () => {
 			expect(await response.text()).toContain("Cloudflare Docs");
 		});
 
-		// Remove once the whacky double-slash rules get removed
-		it("responds with index.html at `//`", async () => {
-			const request = new Request("http://fakehost//");
-			const response = await SELF.fetch(request);
-			expect(response.status).toBe(200);
-			expect(await response.text()).toContain("Cloudflare Docs");
-		});
-
 		it("responds with 404.html at `/non-existent`", async () => {
 			const request = new Request("http://fakehost/non-existent");
 			const response = await SELF.fetch(request);
 			expect(response.status).toBe(404);
 			expect(await response.text()).toContain("Check the URL,");
+		});
+	});
+
+	describe("markdown 404 handling", () => {
+		it("responds with markdown 404 for /index.md requests", async () => {
+			const request = new Request("http://fakehost/non-existent/index.md");
+			const response = await SELF.fetch(request);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Content-Type")).toContain("text/markdown");
+			const body = await response.text();
+			expect(body).toContain("# 404 Page not found");
+			expect(body).toContain("/llms.txt");
+			expect(body).toContain("ai-search.developers.cloudflare.com");
+		});
+
+		it("responds with markdown 404 for Accept: text/markdown requests", async () => {
+			const request = new Request("http://fakehost/non-existent", {
+				headers: { Accept: "text/markdown" },
+			});
+			const response = await SELF.fetch(request);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Content-Type")).toContain("text/markdown");
+			const body = await response.text();
+			expect(body).toContain("# 404 Page not found");
+			expect(body).toContain("/llms.txt");
+		});
+
+		it("responds with markdown 404 for parameterized Accept media types", async () => {
+			const request = new Request("http://fakehost/non-existent", {
+				headers: { Accept: "text/markdown; charset=utf-8, text/html;q=1.0" },
+			});
+			const response = await SELF.fetch(request);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Content-Type")).toContain("text/markdown");
+			const body = await response.text();
+			expect(body).toContain("# 404 Page not found");
+			expect(body).toContain("/llms.txt");
+		});
+
+		it("returns html 404 for unrelated Accept media types", async () => {
+			const request = new Request("http://fakehost/non-existent", {
+				headers: {
+					Accept: "text/markdown-extra, application/not-text-markdown",
+				},
+			});
+			const response = await SELF.fetch(request);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Content-Type")).toContain("text/html");
+			expect(await response.text()).toContain("Check the URL,");
+		});
+	});
+
+	describe(".well-known", () => {
+		it("api-catalog does not advertise a markdown service-doc yet", async () => {
+			const request = new Request("http://fakehost/.well-known/api-catalog");
+			const response = await SELF.fetch(request);
+			expect(response.status).toBe(200);
+			expect(response.headers.get("Content-Type")).toContain(
+				"application/linkset+json",
+			);
+
+			const catalog: any = await response.json();
+			const entry = (catalog.linkset as any[]).find(
+				(e) => e.anchor === "https://developers.cloudflare.com/api/",
+			);
+			expect(entry).toBeDefined();
+
+			const serviceDoc = entry["service-doc"] as any[];
+			expect(serviceDoc.some((d) => d.type === "text/markdown")).toBe(false);
+			expect(
+				serviceDoc.some((d) => String(d.href).endsWith("/api/index.md")),
+			).toBe(false);
+			expect(
+				serviceDoc.some(
+					(d) =>
+						d.type === "text/html" &&
+						d.href === "https://developers.cloudflare.com/api/",
+				),
+			).toBe(true);
 		});
 	});
 
@@ -43,25 +113,18 @@ describe("Cloudflare Docs", () => {
 			expect(response.headers.get("Location")).toBe("/directory/");
 		});
 
-		it("redirects /workers/index.html.md to /workers/index.md", async () => {
-			const request = new Request("http://fakehost/workers/index.html.md");
-			const response = await SELF.fetch(request, { redirect: "manual" });
-
-			expect(response.status).toBe(301);
-			expect(response.headers.get("Location")).toBe("/workers/index.md");
-		});
-
-		it("redirects /fundamentals/setup/manage-domains/remove-domain/index.md to /fundamentals/manage-domains/remove-domain/index.md", async () => {
-			const request = new Request(
-				"http://fakehost/fundamentals/setup/manage-domains/remove-domain/index.md",
-			);
-			const response = await SELF.fetch(request, { redirect: "manual" });
-
-			expect(response.status).toBe(301);
-			expect(response.headers.get("Location")).toBe(
-				"/fundamentals/manage-domains/remove-domain/index.md",
-			);
-		});
+		it.each(["?", "?foo=bar", "?foo=bar%2F", "?cf_page=%2Fpost-slug%2F"])(
+			"redirects requests without a trailing slash and with query %s",
+			async (query) => {
+				const request = new Request(`http://fakehost/docs${query}`);
+				const response = await SELF.fetch(request, { redirect: "manual" });
+				expect(response.status).toBe(301);
+				// The query string is carried over to the destination.
+				expect(response.headers.get("Location")).toBe(
+					`/directory/${new URL(request.url).search}`,
+				);
+			},
+		);
 	});
 
 	describe("json endpoints", () => {
@@ -82,7 +145,7 @@ describe("Cloudflare Docs", () => {
 			expect(urlFlag.experimental).toBe(false);
 
 			expect(nodeJsFlag).toBeDefined();
-			expect(nodeJsFlag.enable_date).toBe(null);
+			expect(nodeJsFlag.enable_date).toBe("2026-08-04");
 		});
 
 		it("pages framework configurations", async () => {
@@ -129,8 +192,6 @@ describe("Cloudflare Docs", () => {
 	});
 
 	describe("rss endpoints", () => {
-		const parser = new XMLParser();
-
 		describe("changelog", () => {
 			it("global", async () => {
 				const request = new Request("http://fakehost/changelog/rss/index.xml");
@@ -139,21 +200,16 @@ describe("Cloudflare Docs", () => {
 				expect(response.status).toBe(200);
 
 				const xml = await response.text();
-				const parsed = parser.parse(xml);
-				const { channel } = parsed.rss;
 
-				expect(channel.title).toBe("Cloudflare changelogs");
-
-				const item = channel.item.find(
-					(item: any) =>
-						item.title ===
-						"Access - New SAML and OIDC Fields and SAML transforms for Access for SaaS",
+				expect(xml).toContain("<title>Cloudflare changelogs</title>");
+				expect(xml).toContain(
+					"<title>Access - New SAML and OIDC Fields and SAML transforms for Access for SaaS</title>",
 				);
-
-				expect(item).toBeDefined();
-				expect(item.product).toBe("Access");
-				expect(item.category).toBe("Access");
-				expect(item.pubDate).toBe("Mon, 03 Mar 2025 00:00:00 GMT");
+				expect(xml).toContain("<product>Access</product>");
+				expect(xml).toContain("<category>Access</category>");
+				expect(xml).toContain(
+					"<pubDate>Mon, 03 Mar 2025 00:00:00 GMT</pubDate>",
+				);
 			});
 		});
 	});
@@ -168,53 +224,46 @@ describe("Cloudflare Docs", () => {
 			const text = await response.text();
 			expect(text).toContain("# Cloudflare Developer Documentation");
 		});
-	});
 
-	describe("index.md handling", () => {
-		it("style-guide fixture", async () => {
-			const request = new Request(
-				"http://fakehost/style-guide/fixtures/markdown/index.md",
-			);
+		it("llms.txt declares utf-8 charset", async () => {
+			for (const path of ["/llms.txt", "/workers/llms.txt"]) {
+				const response = await SELF.fetch(
+					new Request(`http://fakehost${path}`),
+				);
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe(
+					"text/plain; charset=utf-8",
+				);
+			}
+		});
+
+		it("agent setup prompt declares utf-8 charset", async () => {
+			const request = new Request("http://fakehost/agent-setup/prompt.md");
 			const response = await SELF.fetch(request);
 
 			expect(response.status).toBe(200);
-			expect(response.headers.get("x-robots-tag")).toBe("noindex");
-
-			const text = await response.text();
-			expect(text).toMatchInlineSnapshot(`
-				"---
-				title: Markdown · Cloudflare Style Guide
-				description: "The HTML generated by this file is used as a test fixture for our
-				  Markdown generation:"
-				lastUpdated: 2025-01-01T00:00:00.000Z
-				chatbotDeprioritize: true
-				source_url:
-				  html: http://fakehost/style-guide/fixtures/markdown/
-				  md: http://fakehost/style-guide/fixtures/markdown/index.md
-				---
-
-				The HTML generated by this file is used as a test fixture for our Markdown generation:
-
-				* mdx
-
-				  \`\`\`mdx
-				  test
-				  \`\`\`
-
-				* md
-
-				  \`\`\`md
-				  test
-				  \`\`\`
-				"
-			`);
+			expect(response.headers.get("Content-Type")).toBe(
+				"text/markdown; charset=utf-8",
+			);
 		});
 
-		it("responds with 404.html at `/non-existent/index.md`", async () => {
-			const request = new Request("http://fakehost/non-existent/index.md");
+		it("index.md requests preserve markdown through redirects", async () => {
+			// /learning-paths/ redirects to /resources/ — an index.md request
+			// should redirect to /resources/index.md, not the HTML page.
+			const request = new Request("http://fakehost/learning-paths/index.md");
+			const response = await SELF.fetch(request, { redirect: "manual" });
+
+			expect(response.status).toBe(301);
+			expect(response.headers.get("Location")).toBe("/resources/index.md");
+		});
+
+		it("index.md requests for non-redirected paths pass through", async () => {
+			const request = new Request("http://fakehost/workers/index.md");
 			const response = await SELF.fetch(request);
-			expect(response.status).toBe(404);
-			expect(await response.text()).toContain("Check the URL,");
+
+			// Should not be a redirect — just serve normally via ASSETS
+			expect(response.status).not.toBe(301);
 		});
 	});
 
@@ -256,45 +305,12 @@ describe("Cloudflare Docs", () => {
 				const image = dom.querySelector("meta[property='og:image']")?.attributes
 					.content;
 
-				expect(image).toBe(
-					"https://developers.cloudflare.com/dev-products-preview.png",
+				expect(image).toMatch(
+					/^https:\/\/developers\.cloudflare\.com\/workers\/og\.png\?v=[0-9a-f]{16}$/,
 				);
 			});
 		});
 
-		describe("/style-guide/fixtures/markdown/", async () => {
-			const request = new Request(
-				"http://fakehost/style-guide/fixtures/markdown/",
-			);
-			const response = await SELF.fetch(request);
-			expect(response.status).toBe(200);
-
-			const html = await response.text();
-			const dom = parse(html);
-
-			it("title", () => {
-				const title = dom.querySelector("title")?.textContent;
-
-				expect(title).toMatchInlineSnapshot(
-					`"Markdown · Cloudflare Style Guide"`,
-				);
-			});
-
-			it("description", () => {
-				const desc = dom.querySelector("meta[name='description']")?.attributes
-					.content;
-
-				const og = dom.querySelector("meta[property='og:description']")
-					?.attributes.content;
-
-				expect(desc).toMatchInlineSnapshot(
-					`"The HTML generated by this file is used as a test fixture for our Markdown generation:"`,
-				);
-				expect(og).toMatchInlineSnapshot(
-					`"The HTML generated by this file is used as a test fixture for our Markdown generation:"`,
-				);
-			});
-		});
 		describe("/changelog/ entry content types", async () => {
 			const request = new Request(
 				"http://fakehost/changelog/post/2025-03-03-saml-oidc-fields-saml-transformations/",

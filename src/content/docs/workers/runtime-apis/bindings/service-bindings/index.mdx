@@ -7,6 +7,8 @@ head:
   - tag: title
     content: Service bindings - Runtime APIs
 description: Facilitate Worker-to-Worker communication.
+products:
+  - workers
 ---
 
 import { WranglerConfig } from "~/components";
@@ -59,6 +61,10 @@ Worker A that declares a Service binding to Worker B can call Worker B in two di
 
 1. [RPC](/workers/runtime-apis/bindings/service-bindings/rpc) lets you communicate between Workers using function calls that you define. For example, `await env.BINDING_NAME.myMethod(arg1)`. This is recommended for most use cases, and allows you to create your own internal APIs that your Worker makes available to other Workers.
 2. [HTTP](/workers/runtime-apis/bindings/service-bindings/http) lets you communicate between Workers by calling the [`fetch()` handler](/workers/runtime-apis/handlers/fetch) from other Workers, sending `Request` objects and receiving `Response` objects back. For example, `env.BINDING_NAME.fetch(request)`.
+
+:::note[Cloudflare Access context]
+Cloudflare Access does not propagate `ctx.access` from Worker A to Worker B. This applies to HTTP requests and RPC invocations. Do not treat the downstream invocation as authenticated by the caller's Access context. For more information, refer to [`ctx.access` limitations](/workers/configuration/cloudflare-access/#ctxaccess-limitations).
+:::
 
 ## Example — build your first Service binding using RPC
 
@@ -133,7 +139,7 @@ For more about the lifecycle of calling a Worker over a Service Binding via RPC,
 
 ## Local development
 
-Local development is supported for Service bindings. For each Worker, open a new terminal and use [`wrangler dev`](/workers/wrangler/commands/#dev) in the relevant directory. When running `wrangler dev`, service bindings will show as `connected`/`not connected` depending on whether Wrangler can find a running `wrangler dev` session for that Worker. For example:
+Local development is supported for Service bindings. For each Worker, open a new terminal and use [`wrangler dev`](/workers/wrangler/commands/general/#dev) in the relevant directory. When running `wrangler dev`, service bindings will show as `connected`/`not connected` depending on whether Wrangler can find a running `wrangler dev` session for that Worker. For example:
 
 ```sh
 $ wrangler dev

@@ -1,5 +1,5 @@
 ---
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import SDKSelector from "./RTKSDKSelector";
 
 const platform = z.enum([
@@ -10,7 +10,6 @@ const platform = z.enum([
 	"web-angular",
 	"mobile-android",
 	"mobile-ios",
-	"mobile-flutter",
 	"mobile-react-native",
 ]);
 

@@ -2,9 +2,14 @@
 
 interface Env {
 	ASSETS: Fetcher;
-	VENDORED_MARKDOWN: R2Bucket;
+	MIDDLECACHE: R2Bucket;
+	PRIVATE_ASSETS: R2Bucket;
 }
 declare module "*/__redirects" {
 	const value: string;
+	export default value;
+}
+declare module "*.woff" {
+	const value: ArrayBuffer;
 	export default value;
 }

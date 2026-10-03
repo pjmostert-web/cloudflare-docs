@@ -55,10 +55,9 @@ Create a new Worker with C3 (`create-cloudflare` CLI). [C3](/pages/get-started/c
 />
 
 <Render
-	file="c3-post-run-steps"
+	file="c3-post-run-steps-hello-world"
 	product="workers"
 	params={{
-		category: "hello-world",
 		type: "Worker only",
 		lang: "TypeScript",
 	}}
@@ -136,7 +135,7 @@ export default {
 
 ## 7. Deploy your Worker
 
-To deploy your consumer Worker, run the [`wrangler deploy`](/workers/wrangler/commands/#deploy) command:
+To deploy your consumer Worker, run the [`wrangler deploy`](/workers/wrangler/commands/general/#deploy) command:
 
 ```sh
 npx wrangler deploy
@@ -144,7 +143,7 @@ npx wrangler deploy
 
 ## 8. Enable event notifications
 
-Now that you have your consumer Worker ready to handle incoming event notification messages, you need to enable event notifications with the [`wrangler r2 bucket notification create` command](/workers/wrangler/commands/#r2-bucket-notification-create) for `example-upload-bucket`:
+Now that you have your consumer Worker ready to handle incoming event notification messages, you need to enable event notifications with the [`wrangler r2 bucket notification create` command](/workers/wrangler/commands/r2/#r2-bucket-notification-create) for `example-upload-bucket`:
 
 ```sh
 npx wrangler r2 bucket notification create example-upload-bucket --event-type object-create --queue example-event-notification-queue

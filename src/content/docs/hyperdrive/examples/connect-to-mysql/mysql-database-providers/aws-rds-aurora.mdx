@@ -6,6 +6,8 @@ sidebar:
   order: 14
 description: Connect Hyperdrive to an AWS RDS database instance.
 reviewed: 2023-09-28
+products:
+  - hyperdrive
 ---
 
 import { Render } from "~/components";
@@ -53,12 +55,6 @@ For regular RDS instances (non-Aurora), you will need to fetch the endpoint and 
 3. Under the **Connectivity & security** header, note down the **Endpoint** and the **Port**.
 
 The endpoint will resemble `YOUR_DATABASE_NAME.cpuo5rlli58m.AWS_REGION.rds.amazonaws.com`, and the port will default to `3306`.
-
-:::note[Support for MySQL-compatible providers]
-
-Support for AWS Aurora MySQL databases is coming soon. Join our early preview support by reaching out to us in the [Hyperdrive Discord channel](https://discord.cloudflare.com/).
-
-:::
 
 ## 2. Create your user
 

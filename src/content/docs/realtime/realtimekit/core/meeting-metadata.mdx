@@ -1,9 +1,12 @@
 ---
 pcx_content_type: navigation
 title: Meeting Metadata
+description: Access meeting state, type, and connection metadata in the RealtimeKit Core SDK.
 slug: realtime/realtimekit/core/meeting-metadata
 sidebar:
   order: 3
+products:
+  - realtime
 ---
 
 import RTKSDKSelector from "~/components/realtimekit/RTKSDKSelector/RTKSDKSelector.astro";
@@ -75,19 +78,6 @@ The `meeting.meta` object contains the following properties:
 - **`socketConnectionState`** - The current state of the socket connection
 
  </RTKCodeSnippet>
-
-<RTKCodeSnippet id="mobile-flutter">
-
-The `meeting.meta` object contains the following properties:
-
-- **`meetingId`** - The unique identifier of the meeting
-- **`meetingTitle`** - The title of the meeting
-- **`meetingStartedTimestamp`** - The timestamp when the meeting started
-- **`meetingType`** - Indicates the meeting type, which can be one of `groupCall`, `webinar`, or `livestream` from the `RtkMeetingType` enum
-- **`activeTab`** - Information about the currently active tab for the local participant
-
- </RTKCodeSnippet>
-
 <RTKCodeSnippet id="mobile-react-native">
 
 The `meeting.meta` object contains the following properties:
@@ -161,16 +151,6 @@ let meetingTitle = meeting.meta.meetingTitle
 ```
 
  </RTKCodeSnippet>
-
-<RTKCodeSnippet id="mobile-flutter">
-
-```dart
-final meetingTitle = meeting.meta.meetingTitle;
-print("The local user has joined ${meetingTitle}.");
-```
-
-</RTKCodeSnippet>
-
 <RTKCodeSnippet id="mobile-react-native">
 
 ```tsx
@@ -277,13 +257,6 @@ let mediaConnectionState = meeting.meta.mediaConnectionState
 ```
 
  </RTKCodeSnippet>
-
-<RTKCodeSnippet id="mobile-flutter">
-
-Media connection events are not available in Flutter. Monitor the connection state through the meeting state changes.
-
- </RTKCodeSnippet>
-
 <RTKCodeSnippet id="mobile-react-native">
 
 Updates to the media connection (WebRTC connection used for the transfer of actual media) are sent via the `mediaConnectionUpdate` event.
@@ -407,13 +380,6 @@ let socketConnectionState = meeting.meta.socketConnectionState
 ```
 
  </RTKCodeSnippet>
-
-<RTKCodeSnippet id="mobile-flutter">
-
-Socket connection events are not available in Flutter. Monitor the connection state through the meeting state changes.
-
- </RTKCodeSnippet>
-
 <RTKCodeSnippet id="mobile-react-native">
 
 Updates to the WebSocket connection (used for chat, polls, and other basic signaling) are sent via the `socketConnectionUpdate` event.

@@ -1,8 +1,11 @@
 ---
 pcx_content_type: concept
 title: Pricing
+description: R2 pricing for storage, Class A and Class B operations, and free tier details.
 sidebar:
   order: 13
+products:
+  - r2
 ---
 
 import { InlineBadge } from "~/components";
@@ -94,11 +97,11 @@ For objects stored in Infrequent Access storage, you will be charged for the obj
 | Standard storage                                       | None                     |
 | Infrequent Access storage                              | 30 days                  |
 
-## R2 Data Catalog pricing
+<a id="r2-data-catalog-pricing"></a>
 
-R2 Data Catalog is in **public beta**, and any developer with an [R2 subscription](/r2/pricing/) can start using it. Currently, outside of standard R2 storage and operations, you will not be billed for your use of R2 Data Catalog. We will provide at least 30 days' notice before we make any changes or start charging for usage.
+## Basin Catalog pricing
 
-To learn more about our thinking on future pricing, refer to the [R2 Data Catalog announcement blog](https://blog.cloudflare.com/r2-data-catalog-public-beta).
+Basin Catalog charges for catalog operations and compaction data processed, in addition to standard R2 storage and operations. For full details, refer to [Basin Catalog pricing](/basin-catalog/platform/pricing/).
 
 ## Data migration pricing
 
@@ -159,7 +162,7 @@ If a user writes 100,000 files with an average size of 100 KB object and reads 1
 
 ## Cloudflare billing policy
 
-To learn more about how usage is billed, refer to [Cloudflare Billing Policy](/billing/billing-policy/).
+To learn more about how usage is billed, refer to [Cloudflare Billing Policy](/billing/understand/billing-policy/).
 
 ## Frequently asked questions
 
